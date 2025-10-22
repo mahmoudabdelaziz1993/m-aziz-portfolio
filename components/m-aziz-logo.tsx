@@ -24,11 +24,11 @@ const LogoContent: Record<Language, NavbarLogoContent> = {
     }
 }
 
-export function NavbarLogo() {
+export function MazizLogo() {
     const { lang } = useLanguage();
     const content = LogoContent[lang]
     return (
-        <div className="flex gap-2 items-center ">
+        <div className="flex space-x-2 items-center ">
             <motion.div
                 className="grid place-items-center  w-12"
                 whileHover={{ scale: 0.9 }}
@@ -46,8 +46,8 @@ export function NavbarLogo() {
             </motion.div>
             <hgroup className='flex flex-col gap-0'>
 
-                <h1 className='text-md font-bold leading-tight'>{content.name}</h1>
-                <p className='text-xs font-medium text-muted-foreground'>{content.jobTitle} </p>
+                <h1 className='sm:text-base text-md font-semibold leading-tight'>{content.name}</h1>
+                <p className='sm:text-xs text-[9px] font-medium text-muted-foreground'>{content.jobTitle} </p>
             </hgroup>
             <p>
 
