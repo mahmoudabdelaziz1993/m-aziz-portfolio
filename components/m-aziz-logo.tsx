@@ -28,7 +28,7 @@ export function MazizLogo() {
     const { lang } = useLanguage();
     const content = LogoContent[lang]
     return (
-        <div className="flex space-x-2 items-center ">
+        <div className="flex space-x-2 items-center rtl:flex-row-reverse ">
             <motion.div
                 className="grid place-items-center  w-12"
                 whileHover={{ scale: 0.9 }}
@@ -44,7 +44,7 @@ export function MazizLogo() {
                     </svg>
                 </Link>
             </motion.div>
-            <hgroup className='flex flex-col gap-0'>
+            <hgroup className='sm:flex flex-col gap-0  hidden'>
 
                 <h1 className='sm:text-base text-md font-semibold leading-tight'>{content.name}</h1>
                 <p className='sm:text-xs text-[9px] font-medium text-muted-foreground'>{content.jobTitle} </p>

@@ -18,6 +18,7 @@ export interface FaultyTerminalProps extends React.HTMLAttributes<HTMLDivElement
   dither?: number | boolean;
   curvature?: number;
   tint?: string;
+  bgColor?: string;
   mouseReact?: boolean;
   mouseStrength?: number;
   dpr?: number;
@@ -54,6 +55,7 @@ uniform float uChromaticAberration;
 uniform float uDither;
 uniform float uCurvature;
 uniform vec3  uTint;
+uniform vec3  uBgColor;
 uniform vec2  uMouse;
 uniform float uMouseStrength;
 uniform float uUseMouse;
@@ -221,6 +223,9 @@ void main() {
 
     col *= uTint;
     col *= uBrightness;
+    
+    // Blend with background color - use lower mix to show more terminal effect
+    col = mix(uBgColor, col, 0.3);
 
     if(uDither > 0.0){
       float rnd = hash21(gl_FragCoord.xy);
@@ -242,6 +247,62 @@ function hexToRgb(hex: string): [number, number, number] {
   return [((num >> 16) & 255) / 255, ((num >> 8) & 255) / 255, (num & 255) / 255];
 }
 
+function oklchToRgb(l: number, c: number, h: number): [number, number, number] {
+  const hRad = (h * Math.PI) / 180;
+  const cb = c * Math.cos(hRad);
+  const ca = c * Math.sin(hRad);
+
+  const l_ = l + 0.3963377774 * cb + 0.2158037573 * ca;
+  const m_ = l - 0.1055613458 * cb - 0.0638541728 * ca;
+  const s_ = l - 0.0894841775 * cb - 1.291486575 * ca;
+
+  const l3 = l_ * l_ * l_;
+  const m3 = m_ * m_ * m_;
+  const s3 = s_ * s_ * s_;
+
+  const r = +4.0767416621 * l3 - 3.3077363322 * m3 + 0.2309101289 * s3;
+  const g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193761 * s3;
+  const b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
+
+  return [
+    Math.max(0, Math.min(1, r)),
+    Math.max(0, Math.min(1, g)),
+    Math.max(0, Math.min(1, b))
+  ];
+}
+
+function getThemeColor(varName: string): [number, number, number] {
+  try {
+    if (typeof document === 'undefined') return [1, 1, 1];
+
+    const root = document.documentElement;
+    const value = getComputedStyle(root).getPropertyValue(varName).trim();
+
+    if (!value) {
+      console.warn(`CSS variable ${varName} not found`);
+      return [1, 1, 1];
+    }
+
+    // Parse oklch format: "0.147 0.004 49.25"
+    const parts = value.split(/\s+/).filter(p => p.length > 0);
+    if (parts.length === 3) {
+      const lightness = parseFloat(parts[0]);
+      const chroma = parseFloat(parts[1]);
+      const hue = parseFloat(parts[2]);
+
+      if (!isNaN(lightness) && !isNaN(chroma) && !isNaN(hue)) {
+        return oklchToRgb(lightness, chroma, hue);
+      }
+    }
+
+    console.warn(`Failed to parse CSS variable ${varName}: ${value}`);
+    return [1, 1, 1];
+  } catch (e) {
+    console.error('Error reading theme color:', e);
+    return [1, 1, 1];
+  }
+}
+
 export default function FaultyTerminal({
   scale = 1,
   gridMul = [2, 1],
@@ -256,9 +317,10 @@ export default function FaultyTerminal({
   dither = 0,
   curvature = 0.2,
   tint = '#ffffff',
+  bgColor = '#1a1a1a',
   mouseReact = true,
   mouseStrength = 0.2,
-  dpr = Math.min(window.devicePixelRatio || 1, 2),
+  dpr = 1,
   pageLoadAnimation = true,
   brightness = 1,
   className,
@@ -276,6 +338,30 @@ export default function FaultyTerminal({
   const timeOffsetRef = useRef<number>(Math.random() * 100);
 
   const tintVec = useMemo(() => hexToRgb(tint), [tint]);
+
+  const bgColorVec = useMemo(() => {
+    if (bgColor) {
+      if (bgColor.startsWith('var(')) {
+        // Extract variable name and get theme color
+        const varMatch = bgColor.match(/var\((--[^)]+)\)/);
+        if (varMatch) {
+          try {
+            return getThemeColor(varMatch[1]);
+          } catch (e) {
+            console.warn('Failed to get theme color:', varMatch[1], e);
+            return [1, 1, 1];
+          }
+        }
+      }
+      try {
+        return hexToRgb(bgColor);
+      } catch (e) {
+        console.warn('Failed to parse hex color:', bgColor, e);
+        return [1, 1, 1];
+      }
+    }
+    return [1, 1, 1]; // Default white background
+  }, [bgColor]);
 
   const ditherValue = useMemo(() => (typeof dither === 'boolean' ? (dither ? 1 : 0) : dither), [dither]);
 
@@ -295,7 +381,7 @@ export default function FaultyTerminal({
     const renderer = new Renderer({ dpr });
     rendererRef.current = renderer;
     const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(bgColorVec[0], bgColorVec[1], bgColorVec[2], 1);
 
     const geometry = new Triangle(gl);
 
@@ -319,6 +405,7 @@ export default function FaultyTerminal({
         uDither: { value: ditherValue },
         uCurvature: { value: curvature },
         uTint: { value: new Color(tintVec[0], tintVec[1], tintVec[2]) },
+        uBgColor: { value: new Color(bgColorVec[0], bgColorVec[1], bgColorVec[2]) },
         uMouse: {
           value: new Float32Array([smoothMouseRef.current.x, smoothMouseRef.current.y])
         },
@@ -412,6 +499,7 @@ export default function FaultyTerminal({
     ditherValue,
     curvature,
     tintVec,
+    bgColorVec,
     mouseReact,
     mouseStrength,
     pageLoadAnimation,

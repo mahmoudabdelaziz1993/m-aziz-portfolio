@@ -19,7 +19,7 @@ function Navbar() {
 
 
     return (
-        <header dir={direction} className="fixed top-6 inset-x-4 max-w-(--breakpoint-xl) mx-auto rounded-full  bg-background/10 backdrop-blur-lg px-4 h-16">
+        <header dir={direction} className="fixed z-50 top-6 inset-x-4 max-w-(--breakpoint-xl) mx-auto rounded-full  px-4 h-16">
             {/* navbar container */}
             <div className="flex items-center justify-between w-full h-full">
                 {/* Logo */}
