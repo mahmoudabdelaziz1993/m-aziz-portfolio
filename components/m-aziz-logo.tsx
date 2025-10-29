@@ -28,9 +28,9 @@ export function MazizLogo() {
     const { lang } = useLanguage();
     const content = LogoContent[lang]
     return (
-        <div className="flex space-x-2 items-center rtl:flex-row-reverse ">
+        <div className="flex space-x-2 items-center">
             <motion.div
-                className="grid place-items-center  w-12"
+                className="grid place-items-center  w-12 dark:text-primary"
                 whileHover={{ scale: 0.9 }}
                 whileTap={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}

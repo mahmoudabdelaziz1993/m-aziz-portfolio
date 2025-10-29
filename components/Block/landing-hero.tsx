@@ -1,14 +1,14 @@
 'use client'
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, CirclePlay } from "lucide-react";
+import { ArrowUpRight, CalendarCheck, CirclePlay, Download } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import FaultyTerminal from "@/components/FaultyTerminal";
-import { useLanguage } from "@/hooks/Language";
+import { Language, useLanguage } from "@/hooks/Language";
 import { useTheme } from "next-themes";
 
-type Language = 'en' | 'ar';
+
 
 interface HeroContent {
     badge: string;
@@ -29,9 +29,9 @@ const heroContent: Record<Language, HeroContent> = {
         watchDemo: "Download Resume"
     },
     ar: {
-        badge: "متخصص React و Next.js | 6+ سنوات في بناء واجهات سريعة",
+        badge: "متخصص في React وNext.js | خبرة تزيد عن 6 سنوات في بناء واجهات مستخدم سريعة",
         heading: "مرحبا، أنا محمود — مطور واجهات أمام في المصفوفة.",
-        paragraph: "المطر الرقمي لا يتوقف أبدا — وهنا أزدهر. بين خطافات React والرسوم المتحركة والكود النظيف، أبني واجهات تشعر بأنها حية. لقد أخذت بالفعل الحبة الحمراء… الآن دعنا ننشئ شيئا يثني قواعد الواقع.",
+        paragraph: "المطر الرقمي لا ينقطع، وهنا حيث أزدهر. بين أدوات React والرسوم المتحركة والأكواد البرمجية النظيفة، أبني واجهات تبدو حيوية. لقد تذوقتَ طعم النجاح... والآن هيا بنا نبتكر شيئًا يكسر قواعد الواقع.",
         disclaimer: "(فقط لا تخبري وكيل الموعد النهائي أنني متصلة.)",
         getStarted: "جدول الاجتماع",
         watchDemo: "تحميل السيرة الذاتية"
@@ -59,12 +59,12 @@ const LandingHero = () => {
                     mouseReact={true}
                     mouseStrength={1.5}
                     pageLoadAnimation={true}
-                    brightness={theme === "dark" ? 2 : .8}
+                    brightness={theme === "dark" ? .5 : .3}
                     scanlineIntensity={0.9}
                     glitchAmount={0.5}
                     noiseAmp={1}
-                    tint={theme === "dark" ? "#006239" : "#72e3ad"}
-                    bgColor={theme === "dark" ? "#121212" : "#fcfcfc"}
+                    tint={theme === "dark" ? "#0f0" : "#0f0"}
+                    bgColor={theme === "dark" ? "#000" : "#E5E9E6"}
                 />
             </div>
 
@@ -89,15 +89,17 @@ const LandingHero = () => {
                     {content.disclaimer}
                 </p>
                 <div className="mt-12 flex items-center justify-center gap-4 flex-wrap">
-                    <Button size="lg" className="rounded-full text-base">
-                        {content.getStarted} <ArrowUpRight className="size-5" />
+                    <Button size="lg" className="rounded-full text-base" asChild>
+                        <a href="https://calendly.com/mahmoudabdelaziz1993/new-meeting" target="_blank" rel="noopener noreferrer">
+                            {content.getStarted} <CalendarCheck />
+                        </a>
                     </Button>
                     <Button
                         variant="secondary"
                         size="lg"
                         className="rounded-full text-base"
                     >
-                        <CirclePlay className="size-5" /> {content.watchDemo}
+                        <Download /> {content.watchDemo}
                     </Button>
                 </div>
             </div>

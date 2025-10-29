@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-type Language = 'en' | 'ar';
+export type Language = 'en' | 'ar';
 
 export function useLanguage() {
     const [lang, setLang] = useState<Language>('en');
