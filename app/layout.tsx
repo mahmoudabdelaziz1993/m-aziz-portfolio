@@ -1,12 +1,12 @@
 'use client'
 import type { Metadata } from "next";
-import { Carter_One, Electrolize, Amiri, Tajawal } from "next/font/google";
+import { Tektur, Electrolize, Alexandria, Tajawal } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useLanguage } from "@/hooks/Language";
 
 // English fonts
-const carter_One = Carter_One({
+const tektur = Tektur({
   variable: "--font-heading-en",
   weight: "400",
   subsets: ["latin"],
@@ -19,7 +19,7 @@ const electrolize = Electrolize({
 });
 
 // Arabic fonts
-const amiAmiri = Amiri({
+const alexandria = Alexandria({
   variable: "--font-heading-ar",
   weight: ["400", "700"],
   subsets: ["arabic"],
@@ -44,7 +44,7 @@ export default function RootLayout({
 
   const { direction, lang } = useLanguage();
   return (
-    <html lang={lang} dir={direction} suppressHydrationWarning className={`${carter_One.variable} ${electrolize.variable} ${amiAmiri.variable} ${tajawal.variable}`}>
+    <html lang={lang} dir={direction} suppressHydrationWarning className={`${tektur.variable} ${electrolize.variable} ${alexandria.variable} ${tajawal.variable}`}>
       <body className="antialiased">
         <ThemeProvider
           attribute="class"

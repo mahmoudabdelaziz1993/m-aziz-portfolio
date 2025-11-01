@@ -1,5 +1,5 @@
 'use client';
-import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
+import { Renderer, Program, Mesh, Color, Triangle, OGLRenderingContext } from 'ogl';
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 
 type Vec2 = [number, number];
@@ -378,9 +378,44 @@ export default function FaultyTerminal({
     const ctn = containerRef.current;
     if (!ctn) return;
 
-    const renderer = new Renderer({ dpr });
+    const safeDPR = Math.min(dpr || window.devicePixelRatio || 1, 1.5);
+
+    let renderer: Renderer;
+    let gl: OGLRenderingContext;
+
+    try {
+      renderer = new Renderer({
+        dpr: safeDPR,
+        antialias: false,
+        alpha: false,
+        depth: false,
+        stencil: false,
+        powerPreference: "high-performance",
+      });
+
+      gl = renderer.gl as OGLRenderingContext;
+      if (!gl) throw new Error("Renderer created but WebGL invalid");
+
+    } catch (err) {
+      console.warn("WebGL create failed — fallback", err);
+
+      const canvas = document.createElement("canvas");
+
+      const fallbackGl =
+        canvas.getContext("webgl2", { antialias: false, alpha: false }) ||
+        canvas.getContext("webgl", { antialias: false, alpha: false });
+
+      if (!fallbackGl) {
+        console.error("❌ No WebGL. Using fallback UI.");
+        return;
+      }
+
+      gl = fallbackGl as OGLRenderingContext;
+      renderer = new Renderer({ canvas, dpr: safeDPR });
+    }
+
     rendererRef.current = renderer;
-    const gl = renderer.gl;
+
     gl.clearColor(bgColorVec[0], bgColorVec[1], bgColorVec[2], 1);
 
     const geometry = new Triangle(gl);
@@ -390,11 +425,8 @@ export default function FaultyTerminal({
       fragment: fragmentShader,
       uniforms: {
         iTime: { value: 0 },
-        iResolution: {
-          value: new Color(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height)
-        },
+        iResolution: { value: new Color(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height) },
         uScale: { value: scale },
-
         uGridMul: { value: new Float32Array(gridMul) },
         uDigitSize: { value: digitSize },
         uScanlineIntensity: { value: scanlineIntensity },
@@ -404,23 +436,22 @@ export default function FaultyTerminal({
         uChromaticAberration: { value: chromaticAberration },
         uDither: { value: ditherValue },
         uCurvature: { value: curvature },
-        uTint: { value: new Color(tintVec[0], tintVec[1], tintVec[2]) },
-        uBgColor: { value: new Color(bgColorVec[0], bgColorVec[1], bgColorVec[2]) },
-        uMouse: {
-          value: new Float32Array([smoothMouseRef.current.x, smoothMouseRef.current.y])
-        },
+        uTint: { value: new Color(...tintVec) },
+        uBgColor: { value: new Color(...bgColorVec) },
+        uMouse: { value: new Float32Array([smoothMouseRef.current.x, smoothMouseRef.current.y]) },
         uMouseStrength: { value: mouseStrength },
         uUseMouse: { value: mouseReact ? 1 : 0 },
         uPageLoadProgress: { value: pageLoadAnimation ? 0 : 1 },
         uUsePageLoadAnimation: { value: pageLoadAnimation ? 1 : 0 },
-        uBrightness: { value: brightness }
+        uBrightness: { value: brightness },
       }
     });
+
     programRef.current = program;
 
     const mesh = new Mesh(gl, { geometry, program });
 
-    function resize() {
+    const resize = () => {
       if (!ctn || !renderer) return;
       renderer.setSize(ctn.offsetWidth, ctn.offsetHeight);
       program.uniforms.iResolution.value = new Color(
@@ -428,9 +459,9 @@ export default function FaultyTerminal({
         gl.canvas.height,
         gl.canvas.width / gl.canvas.height
       );
-    }
+    };
 
-    const resizeObserver = new ResizeObserver(() => resize());
+    const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(ctn);
     resize();
 
@@ -452,59 +483,57 @@ export default function FaultyTerminal({
       if (pageLoadAnimation && loadAnimationStartRef.current > 0) {
         const animationDuration = 2000;
         const animationElapsed = t - loadAnimationStartRef.current;
-        const progress = Math.min(animationElapsed / animationDuration, 1);
-        program.uniforms.uPageLoadProgress.value = progress;
+        program.uniforms.uPageLoadProgress.value = Math.min(animationElapsed / animationDuration, 1);
       }
 
       if (mouseReact) {
-        const dampingFactor = 0.08;
-        const smoothMouse = smoothMouseRef.current;
+        const damping = 0.08;
         const mouse = mouseRef.current;
-        smoothMouse.x += (mouse.x - smoothMouse.x) * dampingFactor;
-        smoothMouse.y += (mouse.y - smoothMouse.y) * dampingFactor;
+        const smooth = smoothMouseRef.current;
+        smooth.x += (mouse.x - smooth.x) * damping;
+        smooth.y += (mouse.y - smooth.y) * damping;
 
         const mouseUniform = program.uniforms.uMouse.value as Float32Array;
-        mouseUniform[0] = smoothMouse.x;
-        mouseUniform[1] = smoothMouse.y;
+        mouseUniform.set([smooth.x, smooth.y]);
       }
 
       renderer.render({ scene: mesh });
     };
-    rafRef.current = requestAnimationFrame(update);
-    ctn.appendChild(gl.canvas);
 
-    if (mouseReact) ctn.addEventListener('mousemove', handleMouseMove);
+    rafRef.current = requestAnimationFrame(update);
+
+    const canvas = gl.canvas;
+    if (canvas instanceof HTMLCanvasElement) {
+      canvas.style.pointerEvents = "none";
+      canvas.style.position = "absolute";
+      canvas.style.inset = "0";
+      canvas.style.zIndex = "0";
+      ctn.appendChild(canvas);
+    }
+
+    if (mouseReact) ctn.addEventListener("mousemove", handleMouseMove);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       resizeObserver.disconnect();
-      if (mouseReact) ctn.removeEventListener('mousemove', handleMouseMove);
-      if (gl.canvas.parentElement === ctn) ctn.removeChild(gl.canvas);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
+
+      if (mouseReact) ctn.removeEventListener("mousemove", handleMouseMove);
+
+      const canvas = gl.canvas;
+      if (canvas instanceof HTMLCanvasElement && canvas.parentElement === ctn) {
+        ctn.removeChild(canvas);
+      }
+
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+
       loadAnimationStartRef.current = 0;
       timeOffsetRef.current = Math.random() * 100;
     };
   }, [
-    dpr,
-    pause,
-    timeScale,
-    scale,
-    gridMul,
-    digitSize,
-    scanlineIntensity,
-    glitchAmount,
-    flickerAmount,
-    noiseAmp,
-    chromaticAberration,
-    ditherValue,
-    curvature,
-    tintVec,
-    bgColorVec,
-    mouseReact,
-    mouseStrength,
-    pageLoadAnimation,
-    brightness,
-    handleMouseMove
+    dpr, pause, timeScale, scale, gridMul, digitSize, scanlineIntensity,
+    glitchAmount, flickerAmount, noiseAmp, chromaticAberration, ditherValue,
+    curvature, tintVec, bgColorVec, mouseReact, mouseStrength,
+    pageLoadAnimation, brightness, handleMouseMove
   ]);
 
   return (

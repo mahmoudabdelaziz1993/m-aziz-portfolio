@@ -1,24 +1,35 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useLayoutEffect } from 'react';
 
 export type Language = 'en' | 'ar';
 
-export function useLanguage() {
-    const [lang, setLang] = useState<Language>('en');
-    const [mounted, setMounted] = useState(false);
+const DEFAULT_LANGUAGE: Language = 'en';
 
-    useEffect(() => {
-        // Get saved language from localStorage
-        const savedLang = (localStorage.getItem('language') as Language) || 'en';
+export function useLanguage() {
+    const [lang, setLang] = useState<Language>(DEFAULT_LANGUAGE);
+
+    // Run only once on mount to get initial language
+    useLayoutEffect(() => {
+        const savedLang = (localStorage.getItem('language') as Language) || DEFAULT_LANGUAGE;
         setLang(savedLang);
-        setMounted(true);
+    }, []); // Empty dependency array - runs only once
+
+    // Apply language changes to DOM and storage
+    useLayoutEffect(() => {
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        localStorage.setItem('language', lang);
+    }, [lang]);
+
+    const changeLanguage = useCallback((newLang: Language) => {
+        setLang(newLang);
+        window.dispatchEvent(
+            new CustomEvent('languageChange', { detail: { language: newLang } })
+        );
     }, []);
 
-    useEffect(() => {
-        if (!mounted) return;
-
-        // Listen for language changes from the dropdown
+    useLayoutEffect(() => {
         const handleLanguageChange = (e: Event) => {
             const customEvent = e as CustomEvent<{ language: Language }>;
             setLang(customEvent.detail.language);
@@ -26,30 +37,12 @@ export function useLanguage() {
 
         window.addEventListener('languageChange', handleLanguageChange);
         return () => window.removeEventListener('languageChange', handleLanguageChange);
-    }, [mounted]);
-
-    // Change language programmatically
-    const changeLanguage = useCallback((newLang: Language) => {
-        setLang(newLang);
-        localStorage.setItem('language', newLang);
-        document.documentElement.lang = newLang;
-        document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-
-        // Dispatch event for other components
-        window.dispatchEvent(
-            new CustomEvent('languageChange', { detail: { language: newLang } })
-        );
     }, []);
-
-    // Get boolean for easier RTL checks
-    const isArabic = lang === 'ar';
-    const direction = isArabic ? 'rtl' : 'ltr';
 
     return {
         lang,
-        mounted,
         changeLanguage,
-        isArabic,
-        direction
+        isArabic: lang === 'ar',
+        direction: lang === 'ar' ? 'rtl' : 'ltr' as const
     };
 }

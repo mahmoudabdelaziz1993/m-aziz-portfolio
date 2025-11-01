@@ -18,15 +18,8 @@ const languages: { code: Language; name: string; nativeName: string }[] = [
 ];
 
 export function LanguageDropdown() {
-    const { lang: currentLang, mounted, changeLanguage } = useLanguage();
+    const { lang: currentLang, changeLanguage } = useLanguage();
 
-    if (!mounted) {
-        return (
-            <Button variant='outline' size='icon' className='rounded-full' disabled>
-                <Languages className='w-4 h-4' />
-            </Button>
-        );
-    }
 
     return (
         <DropdownMenu>
@@ -36,6 +29,8 @@ export function LanguageDropdown() {
                     size='icon'
                     className='rounded-full'
                     aria-label='Change language'
+                    aria-haspopup="menu"
+                    aria-expanded="false"
                 >
                     <motion.div
                         initial={{ rotate: 0 }}
@@ -46,7 +41,7 @@ export function LanguageDropdown() {
                     </motion.div>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-40'>
+            <DropdownMenuContent align='end' className='w-40' role="menu">
                 <AnimatePresence mode='wait'>
                     {languages.map((lang) => (
                         <motion.div
@@ -59,6 +54,8 @@ export function LanguageDropdown() {
                             <DropdownMenuItem
                                 onClick={() => changeLanguage(lang.code)}
                                 className='cursor-pointer flex items-center justify-between'
+                                role="menuitemradio"
+                                aria-checked={currentLang === lang.code}
                             >
                                 <div className='flex flex-col'>
                                     <span className='font-medium'>{lang.name}</span>

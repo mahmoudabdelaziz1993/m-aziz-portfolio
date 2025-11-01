@@ -4,12 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-default: var(--font-default-en);
+  --font-sans: var(--font-default-en);
   --font-heading: var(--font-heading-en);
   --radius: 0.625rem;
-
-
-
   --foreground: oklch(0.1450 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.1450 0 0);
@@ -41,9 +38,6 @@
   --sidebar-accent-foreground: oklch(0.2050 0 0);
   --sidebar-border: oklch(0.9220 0 0);
   --sidebar-ring: oklch(0.7080 0 0);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --radius: 0.625rem;
   --shadow-x: 0;
   --shadow-y: 1px;
@@ -80,9 +74,10 @@
   --accent-foreground: oklch(0.2050 0 0);
   --destructive: oklch(0.7040 0.1910 22.2160);
   --destructive-foreground: oklch(0.9850 0 0);
-  --border: oklch(0.2750 0 0);
-  --input: oklch(0.8664 0.2948 142.4953);
-  --ring: oklch(0.5560 0 0);
+  /* FIX: Dark mode outline button border and hover */
+  --border: oklch(0.375 0 0);
+  --input: oklch(0.9235 0.1480 142.3000);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.8100 0.1000 252);
   --chart-2: oklch(0.6200 0.1900 260);
   --chart-3: oklch(0.5500 0.2200 263);
@@ -96,9 +91,6 @@
   --sidebar-accent-foreground: oklch(0.9850 0 0);
   --sidebar-border: oklch(0.2750 0 0);
   --sidebar-ring: oklch(0.4390 0 0);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --radius: 0.625rem;
   --shadow-x: 0;
   --shadow-y: 1px;
@@ -177,6 +169,21 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h5,
+  a,
+  button,
+  blockquote {
+    font-family: var(--font-heading);
+    font-weight: bold;
+
+  }
+
 }
 
 @keyframes matrix-glow {
@@ -196,6 +203,136 @@
 }
 
 [lang="ar"] {
-  --font-default: var(--font-default-ar);
+  --font-sans: var(--font-default-ar);
   --font-heading: var(--font-heading-ar);
+}
+
+
+@keyframes matrix {
+  0% {
+    background-position-y: 0;
+  }
+
+  100% {
+    background-position-y: 1000px;
+  }
+}
+
+.animate-matrix {
+  animation: matrix 14s linear infinite;
+}
+
+.glitch {
+  position: relative;
+  color: var(--foreground);
+  text-shadow: 0 0 8px var(--foreground);
+  animation: glitch-flicker 2.7s infinite steps(1);
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.glitch::before {
+  left: 2px;
+  text-shadow: -2px 0 var(--secondary);
+  animation: glitch-before 1.8s infinite steps(1);
+}
+
+.glitch::after {
+  left: -2px;
+  text-shadow: -2px 0 var(--foreground);
+  animation: glitch-after 1.4s infinite steps(1);
+}
+
+@keyframes glitch-flicker {
+
+  0%,
+  95% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  96% {
+    opacity: 0.5;
+    filter: brightness(4);
+  }
+
+  98% {
+    opacity: 1;
+    filter: none;
+  }
+
+  100% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes glitch-before {
+  0% {
+    clip-path: inset(0 0 80% 0);
+    transform: translateY(-4px);
+  }
+
+  20% {
+    clip-path: inset(10% 0 60% 0);
+    transform: translateY(4px);
+  }
+
+  40% {
+    clip-path: inset(20% 0 40% 0);
+    transform: translateY(-2px);
+  }
+
+  60% {
+    clip-path: inset(40% 0 20% 0);
+    transform: translateY(2px);
+  }
+
+  80% {
+    clip-path: inset(60% 0 10% 0);
+    transform: translateY(-1px);
+  }
+
+  100% {
+    clip-path: inset(0 0 80% 0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes glitch-after {
+  0% {
+    clip-path: inset(80% 0 0 0);
+    transform: translateY(2px);
+  }
+
+  20% {
+    clip-path: inset(60% 0 10% 0);
+    transform: translateY(-2px);
+  }
+
+  40% {
+    clip-path: inset(40% 0 40% 0);
+    transform: translateY(1px);
+  }
+
+  60% {
+    clip-path: inset(20% 0 60% 0);
+    transform: translateY(-1px);
+  }
+
+  80% {
+    clip-path: inset(10% 0 70% 0);
+    transform: translateY(0);
+  }
+
+  100% {
+    clip-path: inset(80% 0 0 0);
+  }
 }
