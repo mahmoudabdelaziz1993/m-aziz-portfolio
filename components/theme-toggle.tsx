@@ -62,7 +62,8 @@ export function ThemeToggle() {
                 size={'icon'}
                 className="rounded-full"
                 disabled
-                aria-label="Toggle theme"
+                aria-label={"light/dark mode switch"}
+                role="switch"
             />
         );
     }

@@ -224,8 +224,8 @@
 
 .glitch {
   position: relative;
-  color: var(--foreground);
-  text-shadow: 0 0 8px var(--foreground);
+  color: var(--primary);
+  text-shadow: 0 0 8px var(--primary);
   animation: glitch-flicker 2.7s infinite steps(1);
 }
 

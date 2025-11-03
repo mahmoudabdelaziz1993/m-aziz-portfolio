@@ -5,8 +5,9 @@ import { ArrowUpRight, BriefcaseBusiness, CalendarCheck, CirclePlay, Download } 
 import Link from "next/link";
 import React from "react";
 import FaultyTerminal from "@/components/FaultyTerminal";
-import { Language, useLanguage } from "@/hooks/Language";
+import { Language } from "@/hooks/Language";
 import { useTheme } from "next-themes";
+import { useLanguageContext } from "@/providers/LanguageProvider";
 
 
 
@@ -38,7 +39,7 @@ const heroContent: Record<Language, HeroContent> = {
     }
 };
 const LandingHero = () => {
-    const { lang } = useLanguage();
+    const { lang } = useLanguageContext()
     const content = heroContent[lang];
     const { theme } = useTheme()
 

@@ -1,11 +1,12 @@
 'use client'
-import { useLanguage } from '@/hooks/Language';
+
+import { Language } from '@/hooks/Language';
+import { useLanguageContext } from '@/providers/LanguageProvider';
 import { motion } from 'motion/react'
 import Link from 'next/link'
 
 
 
-type Language = 'en' | 'ar';
 
 interface NavbarLogoContent {
     name: string;
@@ -26,12 +27,12 @@ const LogoContent: Record<Language, NavbarLogoContent> = {
 }
 
 export function MazizLogo() {
-    const { lang } = useLanguage();
-    const content = LogoContent[lang]
+    const { lang } = useLanguageContext();
+    const { name, jobTitle } = LogoContent[lang]
     return (
         <div className="flex space-x-2 items-center">
             <motion.div
-                className="grid place-items-center  w-12 dark:text-primary"
+                className="grid place-items-center  w-12 text-accent"
                 whileHover={{ scale: 0.9 }}
                 whileTap={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
@@ -47,8 +48,8 @@ export function MazizLogo() {
             </motion.div>
             <hgroup className='sm:flex flex-col gap-0  hidden'>
 
-                <h1 className='sm:text-base text-md font-semibold leading-tight'>{content.name}</h1>
-                <p className='sm:text-xs text-[9px] font-medium text-muted-foreground'>{content.jobTitle} </p>
+                <h1 className='sm:text-base text-md font-semibold leading-tight'>{name}</h1>
+                <p className='sm:text-xs text-[9px] font-medium text-muted-foreground'>{jobTitle} </p>
             </hgroup>
             <p>
 

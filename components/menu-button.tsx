@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/sheet"
 import { Button } from "./ui/button"
 import { Github, Linkedin, Menu, Twitter, X } from "lucide-react"
-import { useLanguage } from "@/hooks/Language"
 import { motion, AnimatePresence } from "motion/react"
 import type { Variants } from "motion/react"
 import { MazizLogo } from "./m-aziz-logo"
+import { useLanguageContext } from "@/providers/LanguageProvider"
 
 type Language = 'en' | 'ar';
 
@@ -48,6 +48,13 @@ const menuContent: Record<Language, MenuContent> = {
     }
 };
 
+const socials = [
+    { name: "GitHub", icon: Github, href: "https://github.com/..." },
+    { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com/..." },
+    { name: "Twitter", icon: Twitter, href: "https://twitter.com/..." },
+];
+
+
 // Animation variants
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -80,7 +87,7 @@ const menuIconVariants: Variants = {
 };
 
 export function MenuButton() {
-    const { lang, isArabic, direction } = useLanguage();
+    const { lang, isArabic, direction } = useLanguageContext();
     const [isOpen, setIsOpen] = useState(false);
     const content = menuContent[lang];
     return (
@@ -95,6 +102,8 @@ export function MenuButton() {
                         size={"icon"}
                         className="rounded-full"
                         aria-label="Open menu"
+                        aria-haspopup="menu"
+                        aria-expanded={isOpen}
                     >
                         <motion.div
                             variants={menuIconVariants}
@@ -126,6 +135,8 @@ export function MenuButton() {
                     variants={containerVariants}
                     initial="hidden"
                     animate={isOpen ? "visible" : "hidden"}
+                    role="navigation"
+                    aria-label="Main menu"
                 >
                     <AnimatePresence mode="wait">
                         {isOpen && content.items.map((item, index) => (
@@ -134,6 +145,7 @@ export function MenuButton() {
                                 href={item.href}
                                 variants={itemVariants}
                                 onClick={() => setIsOpen(false)}
+                                aria-controls="mobile-menu"
                                 className=" px-4 py-3 rounded-full text-lg font-medium transition-colors
                                 w-3/4 items-center flex justify-center
                                     hover:bg-accent hover:text-accent-foreground
@@ -171,15 +183,18 @@ export function MenuButton() {
                     </p>
 
                     <div className="flex gap-2">
-                        {['GitHub', 'LinkedIn'].map((social) => (
+                        {socials.map(({ name, icon: Icon, href }) => (
                             <Button
-                                key={social}
-                                size={"icon"}
-                                variant={"link"}
+                                key={name}
+                                size="icon"
+                                variant="link"
                                 className="rounded-full"
-                                aria-label={social}
+                                aria-label={name}
+                                asChild
                             >
-                                {social === 'Twitter' ? <Twitter /> : social === 'GitHub' ? <Github /> : <Linkedin />}
+                                <a href={href} target="_blank" rel="noopener noreferrer">
+                                    <Icon />
+                                </a>
                             </Button>
                         ))}
                     </div>

@@ -8,7 +8,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useLanguage } from '@/hooks/Language';
+
+import { useLanguageContext } from '@/providers/LanguageProvider';
 
 type Language = 'en' | 'ar';
 
@@ -18,7 +19,7 @@ const languages: { code: Language; name: string; nativeName: string }[] = [
 ];
 
 export function LanguageDropdown() {
-    const { lang: currentLang, changeLanguage } = useLanguage();
+    const { lang: currentLang, changeLanguage } = useLanguageContext();
 
 
     return (

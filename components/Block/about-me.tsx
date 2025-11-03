@@ -2,10 +2,11 @@
 
 import { motion } from "motion/react"
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
-import { Language, useLanguage } from "@/hooks/Language";
+import { Language } from "@/hooks/Language";
+import { useLanguageContext } from "@/providers/LanguageProvider";
 
 const techStack = ["React", "Next.js", "TypeScript", "Tailwind", "Node.js", "Supabase"];
 
@@ -35,7 +36,7 @@ Code is not just logic — it’s a system. A world. A signal in the Matrix.`,
 }
 
 export default function AboutMe() {
-    const { lang } = useLanguage()
+    const { lang } = useLanguageContext()
     const { heading, paragraph, tagline } = AboutSectionContent[lang]
 
     return (
@@ -95,6 +96,7 @@ export default function AboutMe() {
                                 src="/ma-matrix.png"
                                 alt="Portrait of Mahmoud Abdelaziz"
                                 fill
+                                sizes="(max-width:1024px) 500px , (max-width: 768px) 350px , 300px"
                                 className="object-cover"
                                 priority
                             />

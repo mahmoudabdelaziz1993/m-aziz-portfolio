@@ -1,6 +1,7 @@
 'use client'
 import { Language, useLanguage } from "@/hooks/Language";
 import MatrixSkillsRain from "../IconDigitalRain";
+import { useLanguageContext } from "@/providers/LanguageProvider";
 
 
 const SkillsSectionContent: Record<Language, {
@@ -18,7 +19,7 @@ const SkillsSectionContent: Record<Language, {
 }
 
 export default function SkillsSection() {
-    const { lang } = useLanguage()
+    const { lang } = useLanguageContext()
     const { title, subTitle } = SkillsSectionContent[lang]
     return (
         <div className="relative w-full h-screen overflow-hidden">
